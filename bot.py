@@ -30,3 +30,14 @@ def ration(m):
         bot.send_message(m.chat.id, "❌ गलत नंबर है!\n12 अंकों का राशन कार्ड नंबर भेजें।\nउदाहरण: /ration 123456789"); return
     bot.send_message(m.chat.id, "राशन कार्ड खोजा जा रहा है...")
     # Wahi wala tarika jisse tumhari wali PDF khuli thi - seedha ViewRC
+    details = base64.b64encode(no.encode()).decode()
+    url = f"https://nfsa.up.gov.in/Food/TrackingRationCard/ViewRC.aspx?Details={details}"
+    msg = f"✅ राशन कार्ड विवरण मिल गया है!\n\n🆔 कार्ड नंबर: {no}\n\n👇 नीचे बटन दबाओ, phir Chrome me kholo:"
+    mk = types.InlineKeyboardMarkup()
+    mk.add(types.InlineKeyboardButton("📄 राशन कार्ड देखें / Print PDF", url=url))
+    bot.send_message(m.chat.id, msg, reply_markup=mk)
+@bot.message_handler(func=lambda m: True)
+def anything(m):
+    bot.send_message(m.chat.id, "राशन कार्ड देखने के लिए भेजें:\n/ration 123456789")
+print("Bot chal raha hai...")
+bot.infinity_polling()
