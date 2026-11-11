@@ -1,7 +1,4 @@
-
 # RATION PDF BOT - Final Code
-# pip install pyTelegramBotAPI
-# BotFather se token leke BOT_TOKEN me daalo
 
 import telebot
 from telebot import types
@@ -23,12 +20,9 @@ def _keep_alive():
         pass
 threading.Thread(target=_keep_alive, daemon=True).start()
 
-
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "APNA_BOT_TOKEN_YAHAN_DAALO")  # Render Environment se aayega
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "APNA_BOT_TOKEN_YAHAN_DAALO")
 bot = telebot.TeleBot(BOT_TOKEN)
 
-# FIX: reply_to hata diya - reply_to se Telegram upar tumhara naam (Hariom) quote karke dikhata tha.
-# Ab sirf send_message use hoga, to upar naam wala box nahi aayega.
 # /start
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -49,27 +43,22 @@ def ration(message):
 
     ration_no = parts[1].strip()
 
-    # Sirf number + 12 digit check (UP ration card 12 digit hota hai)
     if not re.fullmatch(r"\d{12}", ration_no):
         bot.send_message(message.chat.id, "❌ गलत नंबर है!\n12 अंकों का राशन कार्ड नंबर भेजें।\nउदाहरण: /ration 215541438805")
         return
 
     bot.send_message(message.chat.id, "राशन कार्ड खोजा जा रहा है...")
 
-    # Tum wala format - jaisa photo me hai, waisa hi:
-    # Details = base64("0915500813140750#00002103#<tumhara ration number>")
-    # Example: 215541438805 ke liye
-    # Details = MDkxNTUwMDgxMzE0MDc1MCMwMDAwMjEwMyMyMTU1NDE0Mzg4MDU=
-    # Aage wala 0915500813140750#00002103# same rahega, peeche wala number badlega
-    # Isliye har number ki alag link banegi, alag slip khulegi.
+    # Details = base64("0915500813140750#00002103#<ration number>")
     long_text = f"0915500813140750#00002103#{ration_no}"
     details = base64.b64encode(long_text.encode()).decode()
-    url = f"https://nfsa.up.gov.in/Food/TrackingRationCard/ViewRC.aspx?Details={details}"
+    url = f"https://nfsa.up.gov.in/Food/TrackingRationCard/ViewRC.aspx?Details={details}&v={ration_no}"
 
     msg = (
         f"✅ राशन कार्ड विवरण मिल गया है!\n\n"
         f"🆔 कार्ड नंबर: {ration_no}\n\n"
-        f"👇 नीचे दिए गए लिंक पर क्लिक करके पूरा हिंदी राशन कार्ड देखें या PDF सेव (Print) करें:"
+        f"👇 नीचे बटन दबाओ, phir Chrome me kholo (Telegram ke andar wale browser me nahi):\n"
+        f"Chrome me khologe to har number ki nayi slip khulegi, purani cache wali nahi."
     )
 
     markup = types.InlineKeyboardMarkup()
@@ -77,7 +66,6 @@ def ration(message):
     markup.add(btn)
     bot.send_message(message.chat.id, msg, reply_markup=markup)
 
-# Koi bhi aur text bheje to guide karo
 @bot.message_handler(func=lambda m: True)
 def anything(message):
     bot.send_message(message.chat.id, "राशन कार्ड देखने के लिए भेजें:\n/ration 215541438805")
